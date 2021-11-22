@@ -23,6 +23,7 @@ In front of the containers you can configure an nginx reverse proxy (with auto l
 ### Configuration
 
 > Change the environment variable in the .env file
+
 > Change the docker-compose.yml configuration
 
 I find it convenient to associate an IP address to the database container in order to ssh tunnel the server and connect directly to the db.
