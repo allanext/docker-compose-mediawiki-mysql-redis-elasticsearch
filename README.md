@@ -1,0 +1,1 @@
+# docker-compose-mediawiki-mysql-redis-elasticsearch
