@@ -1,6 +1,6 @@
 # docker-compose-mediawiki-mysql-redis-elasticsearch
 
-Docker Compose with MariaDB, Redis and Elastic Search.
+Docker Compose for MediaWiki with MariaDB, Redis and Elastic Search.
 
 ### Requirements
 
