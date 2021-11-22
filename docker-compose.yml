@@ -1,0 +1,88 @@
+# MediaWiki with MariaDB, Redis and ElasticSearch
+
+version: '3.8'
+services:
+  mediawiki:
+    image: mediawiki:1.35
+    container_name: wiki
+    depends_on:
+      - database
+      - redis
+    build: 
+      context: "./"
+      dockerfile: Dockerfile
+    environment:
+      - NETWORK: proxy
+      - VIRTUAL_HOST: $DOMAINS
+      - LETSENCRYPT_HOST: $DOMAINS
+      - LETSENCRYPT_EMAIL: $LETSENCRYPT_EMAIL
+    restart: always
+    ports:
+      - 80
+      - 443
+    networks:
+      - wiki-internal
+      - proxy
+    volumes:
+      - ./images:/var/www/html/images
+      # After initial setup, download LocalSettings.php and extensions to the same directory 
+      # (e.g. docker cp wiki:/var/www/html/LocalSettings.php ./ ) as this yaml and uncomment
+      # the following lines and use compose to restart the mediawiki service
+      # - ./config/LocalSettings.php:/var/www/html/LocalSettings.php
+      # - ./extensions:/var/www/html/extensions/
+  database:
+    container_name: wiki_db
+    image: mariadb
+    restart: always
+    networks:
+      wiki-internal:
+        ipv4_address: 10.0.1.3
+    volumes:
+      - ./db:/var/lib/mysql
+    environment:
+      # @see https://phabricator.wikimedia.org/source/mediawiki/browse/master/includes/DefaultSettings.php
+      MYSQL_DATABASE: wiki
+      MYSQL_USER: wikiuser
+      MYSQL_PASSWORD: wikipassword
+      MYSQL_ROOT_PASSWORD: wikirootpassword
+    
+  redis:
+    image: "redis:6.2"
+    container_name: redis-wiki
+    command: redis-server
+    ports:
+      - "6379:6379"
+    networks:
+      - wiki-internal
+    restart: always
+  elasticsearch:
+    image: "elasticsearch:6.8.20"
+    container_name: elasticsearch-wiki
+    environment:
+      - node.name=elasticsearch
+        #- cluster.name=es-docker-cluster
+        #- discovery.seed_hosts=es02,es03
+        #- cluster.initial_master_nodes=es01,es02,es03
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - ./elastic_data:/usr/share/elasticsearch/data:rw
+    ports:
+      - 9200:9200
+    networks:
+      wiki-internal:
+        ipv4_address: 10.0.1.4
+networks:
+  proxy:
+    external: true
+  wiki-internal:
+    driver: bridge
+    ipam:
+     config:
+       - subnet: 10.0.1.0/24
+         gateway: 10.0.1.1
+         
