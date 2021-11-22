@@ -14,10 +14,9 @@ Install [Docker](https://docs.docker.com/engine/installation/linux/docker-ce/ubu
 ### Get Source
     
     git clone https://github.com/allanext/docker-compose-mediawiki-mysql-redis-elasticsearch.git
-
 ### Eventually
 
-In front of the containers you can configure an nginx reverse proxy (with auto letsencrypt) that creates the "proxy" network.
+In front of the containers you can configure an nginx reverse proxy (with auto letsencrypt) that creates the "proxy" network:
 
 > https://github.com/evertramos/nginx-proxy-automation
 
@@ -26,7 +25,7 @@ In front of the containers you can configure an nginx reverse proxy (with auto l
 > Change the environment variable in the .env file
 > Change the docker-compose.yml configuration
 
-I find it convenient to associate an IP address to the database in order to ssh tunnel to the server and connect directly to the db.
+I find it convenient to associate an IP address to the database container in order to ssh tunnel the server and connect directly to the db.
 ### Install
 
     docker-compose up --build
@@ -37,7 +36,7 @@ I find it convenient to associate an IP address to the database in order to ssh 
 
 > Download the LocalSettings.php and copy it to the config folder
 
-Copy the installed database and wiki extensions to the host
+Copy the installed database and wiki extensions to the host:
 
     docker cp wiki_db:/var/lib/mysql db
     docker cp wiki:/var/www/html/extensions extensions
