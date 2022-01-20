@@ -28,10 +28,10 @@ Configuration
     vim .env  (changed only DEFAULT_EMAIL=user@domain.com)
     cd bin && ./fresh-start.sh --yes -e user@domain.com --skip-docker-image-check
 
-### Mediawiki install and conf
+## Mediawiki install and conf
     
     git clone https://github.com/allanext/docker-compose-mediawiki-mysql-redis-elasticsearch.git
-## Configuration
+### Configuration
 
     cp .env.sample .env
      
@@ -40,11 +40,11 @@ Configuration
 > Change the docker-compose.yml configuration
 
 I find it convenient to associate an IP address to the database container in order to ssh tunnel the server and connect directly to the db.
-## Install
+### Install
 
     docker-compose up --build
 
-## Install MediaWiki
+### Install MediaWiki
 
 > Open your browser and go to your newly configured domain to install the MediaWiki web app
 
@@ -70,7 +70,7 @@ Restart your containers:
     docker-compose stop
     docker-compose start
     
-## Install Elastic Search
+### Install Elastic Search
 
 > To install elasticsearch follow these guides:
 
@@ -79,7 +79,8 @@ Restart your containers:
 
 Chante the permissions to the elastic_data mapped volume:
 
-    chown -R 1000:1000 elastic_data/
+    chown -R 1000:1000 elastic_data_master/
+    chown -R 1000:1000 elastic_data_replica/
 
 > The host needs to set something like:
     
