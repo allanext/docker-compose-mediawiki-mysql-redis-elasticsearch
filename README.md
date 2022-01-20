@@ -30,16 +30,18 @@ Configuration
 
 ## Mediawiki install and conf
     
-    git clone https://github.com/allanext/docker-compose-mediawiki-mysql-redis-elasticsearch.git
+    cd ~/docker
+    git clone https://github.com/allanext/docker-compose-mediawiki-mysql-redis-elasticsearch.git mediawiki
 ### Configuration
 
+    cd mediawiki
     cp .env.sample .env
      
 > Change the environment variable in the .env file
 
 > Change the docker-compose.yml configuration
 
-I find it convenient to associate an IP address to the database container in order to ssh tunnel the server and connect directly to the db.
+I find it convenient to associate an IP address to some containers in order to ssh tunnel the server and connect directly to a specific container.
 ### Install
 
     docker-compose up --build
