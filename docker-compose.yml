@@ -8,6 +8,8 @@ services:
     depends_on:
       - database
       - redis
+      - elastic-master
+      - elastic-replica
     build: 
       context: "./"
       dockerfile: Dockerfile
@@ -39,6 +41,7 @@ services:
         ipv4_address: 10.0.1.3
     volumes:
       - ./db:/var/lib/mysql
+      # - ./config/db:/etc/mysql/conf.d
     environment:
       # @see https://phabricator.wikimedia.org/source/mediawiki/browse/master/includes/DefaultSettings.php
       MYSQL_DATABASE: wiki
@@ -49,33 +52,64 @@ services:
   redis:
     image: "redis:6.2"
     container_name: redis-wiki
-    command: redis-server
+    command: redis-server  # command: redis-server /usr/local/etc/redis/redis.conf --save 60 1 --loglevel warning
     ports:
       - "6379:6379"
+    #volumes:
+    #  - ./config/redis:/usr/local/etc/redis
     networks:
       - wiki-internal
     restart: always
-  elasticsearch:
-    image: "elasticsearch:6.8.20"
-    container_name: elasticsearch-wiki
+  
+  elastic-master:
+    image: elasticsearch:6.8.20
+    container_name: elasticsearch-master-wiki
+    restart: always
     environment:
-      - node.name=elasticsearch
-        #- cluster.name=es-docker-cluster
-        #- discovery.seed_hosts=es02,es03
-        #- cluster.initial_master_nodes=es01,es02,es03
+      - node.name=es-master
+      - cluster.name=docker-cluster
+      #- discovery.seed_hosts=es02,es03
+      #- cluster.initial_master_nodes=es01,es02,es03
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     ulimits:
       memlock:
         soft: -1
         hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
     volumes:
-      - ./elastic_data:/usr/share/elasticsearch/data:rw
+      - ./elastic_data_master:/usr/share/elasticsearch/data:rw
     ports:
       - 9200:9200
     networks:
       wiki-internal:
         ipv4_address: 10.0.1.4
+
+  elastic-replica:
+    image: elasticsearch:6.8.20
+    container_name: elastic-replica
+    restart: always
+    environment:
+      - node.name=es-replica
+      - cluster.name=docker-cluster
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "discovery.zen.ping.unicast.hosts=elastic-master"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - ./elastic_data_replica:/usr/share/elasticsearch/data:rw
+    networks:
+      wiki-internal:
+        ipv4_address: 10.0.1.5
+
 networks:
   proxy:
     external: true
